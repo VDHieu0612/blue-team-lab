@@ -1,0 +1,19 @@
+﻿# Custom Suricata Rules - Blue Team Lab (NT204 Group 07)
+# Reference configuration — actual rules tuned during lab deployment
+
+# --- DoS Detection ---
+alert tcp any any -> $HOME_NET any (msg:"POSSIBLE SYN FLOOD"; flags:S; threshold:type both, track by_src, count 100, seconds 10; classtype:attempted-dos; sid:1000001; rev:1;)
+alert icmp any any -> $HOME_NET any (msg:"ICMP FLOOD"; threshold:type both, track by_src, count 50, seconds 5; classtype:attempted-dos; sid:1000002; rev:1;)
+
+# --- Port Scan Detection ---
+alert tcp any any -> $HOME_NET any (msg:"NMAP PORT SCAN DETECTED"; flags:S; threshold:type both, track by_src, count 20, seconds 3; classtype:network-scan; sid:1000003; rev:1;)
+
+# --- HTTP Anomaly ---
+alert http any any -> $HTTP_SERVERS any (msg:"DIRECTORY TRAVERSAL ATTEMPT"; content:"../"; http_uri; classtype:web-application-attack; sid:1000004; rev:1;)
+alert http any any -> $HTTP_SERVERS any (msg:"SQL INJECTION ATTEMPT"; content:"' OR '1'='1"; http_uri; nocase; classtype:web-application-attack; sid:1000005; rev:1;)
+
+# --- DNS Anomaly ---
+alert dns any any -> any 53 (msg:"DNS TUNNELING POSSIBLE - HIGH FREQUENCY"; threshold:type both, track by_src, count 50, seconds 5; classtype:policy-violation; sid:1000006; rev:1;)
+
+# --- SSH Brute Force ---
+alert tcp any any -> $HOME_NET 22 (msg:"SSH BRUTE FORCE ATTEMPT"; flags:S; threshold:type both, track by_src, count 5, seconds 60; classtype:attempted-admin; sid:1000007; rev:1;)
